@@ -1,8 +1,13 @@
 package com.example.loginreqres
 
-sealed class Routes(val route: String) {
+import kotlinx.serialization.Serializable
 
-    object Hi: Routes("Hi")
-    object SignUp: Routes("Sign Up")
-    object Login: Routes("Login")
+sealed class Routes {
+
+    @Serializable
+    data object Hi: Routes()
+    @Serializable
+    data class SignUp(val email: String): Routes()
+    @Serializable
+    data class Login(val name: String): Routes()
 }

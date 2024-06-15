@@ -4,15 +4,13 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.loginreqres.ui.LoginScreen
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
+import com.example.loginreqres.ui.hi.HiScreen
+import com.example.loginreqres.ui.login.LoginScreen
+import com.example.loginreqres.ui.signup.SignUpScreen
 import com.example.loginreqres.ui.theme.LoginReqresTheme
 
 class MainActivity : ComponentActivity() {
@@ -21,19 +19,22 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             LoginReqresTheme {
-                Surface {
-                    Scaffold(
-                        topBar = {},
-                        content = { it
-                            LoginScreen()
-                        })
+                val navController = rememberNavController()
+                NavHost(
+                    navController = navController,
+                    startDestination = Routes.Hi
+                ) {
+                    composable<Routes.Hi> {
+                        HiScreen { navController.navigate(Routes.SignUp("name@mail.com")) }
+                    }
+                    composable<Routes.SignUp> {
+                        val args = it.toRoute<Routes.SignUp>()
+                        SignUpScreen({ navController.navigate(Routes.Login(args.email)) }, args.email)
+                    }
+                    composable<Routes.Login> {
+                        LoginScreen()
+                    }
                 }
-                /*Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }*/
             }
         }
     }
