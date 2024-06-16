@@ -24,10 +24,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -36,20 +33,35 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import com.example.loginreqres.R
+import com.example.loginreqres.navigation.Routes
+import com.example.loginreqres.navigation.Routes.Login.navigateParams
 import com.example.loginreqres.ui.theme.RGreen
 import com.example.loginreqres.ui.theme.fontRegular
 
 @Composable
-fun SignUpScreen(
-    onClickAgree: Runnable,
-    email: String
-) {
+fun SignUpScreen(viewModel: SignUpViewModel = hiltViewModel(), navController: NavHostController) {
+    LaunchedEffect(Unit) {
+        viewModel.channel.collect { event ->
+            when (event) {
+                is SignUpUiEvent.OnAgree -> {
+                    navController.navigate(Routes.Login.navigateParams(event.name, event.email))
+                }
+            }
+        }
+    }
+
+    SignUpScreen(viewModel, viewModel.uiState)
+}
+
+@Composable
+fun SignUpScreen(viewModel: SignUpUiAction, uiState: SignUpUiState) {
 
     Box(
         modifier = Modifier
@@ -107,23 +119,25 @@ fun SignUpScreen(
                         fontSize = fontRegular
                     )
                     Text(
-                        text = email,
+                        text = uiState.email,
                         modifier = Modifier.padding(bottom = 8.dp),
                         color = Color.White,
                         fontSize = fontRegular,
                         fontWeight = FontWeight.Bold
                     )
-                    var name by remember { mutableStateOf(TextFieldValue("")) }
                     BasicTextField(
-                        value = name,
-                        onValueChange = { name = it },
+                        value = uiState.name,
+                        onValueChange = {
+                            viewModel.onNameTyping(it)
+                            viewModel.onEnableButton()
+                        },
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 8.dp)
                             .background(Color.White, shape = RoundedCornerShape(8.dp))
                             .padding(horizontal = 16.dp, vertical = 16.dp),
                         decorationBox = { innerTextField ->
-                            if (name.text.isEmpty()) {
+                            if (uiState.name.isEmpty()) {
                                 Text(
                                     text = "Name",
                                     color = Color.Gray
@@ -132,9 +146,6 @@ fun SignUpScreen(
                             innerTextField()
                         }
                     )
-
-                    var password by remember { mutableStateOf("") }
-                    var passwordVisibility: Boolean by remember { mutableStateOf(false) }
 
                     Row(
                         modifier = Modifier
@@ -148,45 +159,33 @@ fun SignUpScreen(
                         BasicTextField(
                             modifier = Modifier
                                 .weight(1f),
-                            value = password,
-                            onValueChange = { password = it },
-                            visualTransformation = if (passwordVisibility) VisualTransformation.None else PasswordVisualTransformation(),
-
-                            )
+                            value = uiState.password,
+                            onValueChange = {
+                                viewModel.onPasswordTyping(it)
+                                viewModel.onEnableButton()
+                            },
+                            visualTransformation = if (uiState.showPassword) VisualTransformation.None else PasswordVisualTransformation(),
+                            decorationBox = { innerTextField ->
+                                if (uiState.password.isEmpty()) {
+                                    Text(
+                                        text = "Password",
+                                        color = Color.Gray
+                                    )
+                                }
+                                innerTextField()
+                            }
+                        )
                         TextButton(
-                            onClick = { passwordVisibility = !passwordVisibility },
+                            onClick = { viewModel.onShowPassword(!uiState.showPassword) },
                         ) {
                             Text(
-                                text = "View",
+                                text = if (uiState.showPassword) "Hide" else "View",
                                 color = Color.Black,
                                 fontSize = fontRegular
                             )
                         }
                     }
 
-                    /*TextField(
-                        value = "Password",
-                        visualTransformation = if (passwordVisibility) VisualTransformation.None else PasswordVisualTransformation(),
-                        trailingIcon = {
-                            IconButton(onClick = {
-                                passwordVisibility = !passwordVisibility
-                            }) {
-                                Image(
-                                    imageVector = Icons.Filled.KeyboardArrowLeft,
-                                    contentDescription = "Background Image",
-                                    colorFilter = ColorFilter.tint(Color.White),
-                                    modifier = Modifier
-                                        .align(Alignment.Start)
-                                        .size(40.dp)
-                                )
-                            }
-                        },
-                        onValueChange = { password = it },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(Color.White, shape = RoundedCornerShape(8.dp))
-                            .padding(horizontal = 16.dp, vertical = 12.dp),
-                        )*/
                     Text(
                         text = "By selecting Agree and continue below,",
                         color = Color.White,
@@ -215,13 +214,14 @@ fun SignUpScreen(
                     }
 
                     Button(
-                        onClick = { onClickAgree.run() },
+                        onClick = { viewModel.onAgree() },
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 8.dp)
                             .height(50.dp),
                         shape = RoundedCornerShape(8.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = RGreen)
+                        colors = ButtonDefaults.buttonColors(containerColor = RGreen),
+                        enabled = uiState.enableButton
                     ) {
                         Text(
                             text = "Agree and continue",
@@ -238,5 +238,5 @@ fun SignUpScreen(
 @Preview
 @Composable
 fun PreviewSignUpScreen() {
-    SignUpScreen({}, "name@email.com")
+    SignUpScreen(viewModel = SignUpUiAction.buildFake(), uiState = MutableSignUpUiState())
 }

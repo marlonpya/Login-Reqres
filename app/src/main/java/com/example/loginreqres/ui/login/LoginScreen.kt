@@ -26,10 +26,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,12 +40,29 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import com.example.loginreqres.R
 import com.example.loginreqres.ui.theme.RGreen
 import com.example.loginreqres.ui.theme.fontRegular
 
+
 @Composable
-fun LoginScreen() {
+fun LoginScreen(viewModel: LoginViewModel = hiltViewModel(), navController: NavHostController) {
+    LaunchedEffect(Unit) {
+        viewModel.channel.collect { event ->
+            when(event) {
+                is LoginUiEvent.OnContinue -> {
+                    //navController.navigate(Routes.)
+                }
+            }
+        }
+    }
+    LoginScreen(viewModel = viewModel, uiState = viewModel.uiState)
+}
+
+@Composable
+fun LoginScreen(viewModel: LoginUiAction, uiState: LoginUiState) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -112,21 +126,18 @@ fun LoginScreen() {
                         )
                         Column(modifier = Modifier.padding(start = 8.dp)) {
                             Text(
-                                text = "name",
+                                text = uiState.name,
                                 fontSize = fontRegular,
                                 color = Color.White,
                                 fontWeight = FontWeight.Bold
                             )
                             Text(
-                                text = "name@mail.com",
+                                text = uiState.email,
                                 fontSize = fontRegular,
                                 color = Color.White
                             )
                         }
                     }
-
-                    var password by remember { mutableStateOf("") }
-                    var passwordVisibility: Boolean by remember { mutableStateOf(false) }
 
                     Row(
                         modifier = Modifier
@@ -140,16 +151,27 @@ fun LoginScreen() {
                         BasicTextField(
                             modifier = Modifier
                                 .weight(1f),
-                            value = password,
-                            onValueChange = { password = it },
-                            visualTransformation = if (passwordVisibility) VisualTransformation.None else PasswordVisualTransformation(),
-
-                            )
+                            value = uiState.password,
+                            onValueChange = {
+                                viewModel.onPasswordTyping(it)
+                                viewModel.onEnableButton()
+                            },
+                            visualTransformation = if (uiState.showPassword) VisualTransformation.None else PasswordVisualTransformation(),
+                            decorationBox = { innerTextField ->
+                                if (uiState.password.isEmpty()) {
+                                    Text(
+                                        text = "Password",
+                                        color = Color.Gray
+                                    )
+                                }
+                                innerTextField()
+                            }
+                        )
                         TextButton(
-                            onClick = { passwordVisibility = !passwordVisibility },
+                            onClick = { viewModel.onShowPassword(!uiState.showPassword) },
                         ) {
                             Text(
-                                text = "View",
+                                text = if (uiState.showPassword) "Hide" else "View",
                                 color = Color.Black,
                                 fontSize = fontRegular
                             )
@@ -163,7 +185,8 @@ fun LoginScreen() {
                             .padding(vertical = 8.dp)
                             .height(50.dp),
                         shape = RoundedCornerShape(8.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = RGreen)
+                        colors = ButtonDefaults.buttonColors(containerColor = RGreen),
+                        enabled = uiState.enableButton
                     ) {
                         Text(
                             text = "Continue",
@@ -172,13 +195,15 @@ fun LoginScreen() {
                         )
                     }
 
-                    Text(
-                        text = "Forgot your password?",
-                        color = RGreen,
-                        fontSize = 15.sp,
-                        modifier = Modifier
-                            .padding(vertical = 16.dp)
-                    )
+                    TextButton(onClick = { }) {
+                        Text(
+                            text = "Forgot your password?",
+                            color = RGreen,
+                            fontSize = 15.sp,
+                            modifier = Modifier
+                                .padding(vertical = 16.dp)
+                        )
+                    }
                 }
             }
         }
@@ -188,5 +213,5 @@ fun LoginScreen() {
 @Preview
 @Composable
 fun PreviewLoginScreen() {
-    LoginScreen()
+    LoginScreen(LoginUiAction.buildFake(), MutableLoginUiState())
 }

@@ -24,10 +24,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -35,17 +32,35 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import com.example.loginreqres.R
+import com.example.loginreqres.navigation.Routes
+import com.example.loginreqres.navigation.Routes.SignUp.navigateParams
 import com.example.loginreqres.ui.theme.RGreen
 import com.example.loginreqres.ui.theme.fontRegular
 
 @Composable
-fun HiScreen(onClickContinue: Runnable) {
+fun HiScreen(viewModel: HiViewModel = hiltViewModel(), navController: NavHostController) {
+    LaunchedEffect(Unit) {
+        viewModel.channel.collect { event ->
+            when (event) {
+                is HiUIEvent.OnContinue -> {
+                    navController.navigate(Routes.SignUp.navigateParams(event.email))
+                }
+            }
+        }
+    }
+
+    HiScreen(viewModel, viewModel.uiState)
+}
+
+@Composable
+fun HiScreen(viewModel: HiUiAction, uiState: HiUiState) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -94,17 +109,19 @@ fun HiScreen(onClickContinue: Runnable) {
                     modifier = Modifier
                         .padding(20.dp)
                 ) {
-                    var email by remember { mutableStateOf(TextFieldValue("")) }
                     BasicTextField(
-                        value = email,
-                        onValueChange = { email = it },
+                        value = uiState.email,
+                        onValueChange = {
+                            viewModel.onEmailTyping(it)
+                            viewModel.onEnableButton()
+                        },
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 8.dp)
                             .background(Color.White, shape = RoundedCornerShape(8.dp))
                             .padding(horizontal = 16.dp, vertical = 16.dp),
                         decorationBox = { innerTextField ->
-                            if (email.text.isEmpty()) {
+                            if (uiState.email.isEmpty()) {
                                 Text(
                                     text = "Email",
                                     color = Color.Gray
@@ -115,13 +132,14 @@ fun HiScreen(onClickContinue: Runnable) {
                     )
 
                     Button(
-                        onClick = { onClickContinue.run() },
+                        onClick = { viewModel.onContinue() },
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 8.dp)
                             .height(50.dp),
                         shape = RoundedCornerShape(8.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = RGreen)
+                        colors = ButtonDefaults.buttonColors(containerColor = RGreen),
+                        enabled = uiState.enableButton
                     ) {
                         Text(text = "Continue", color = Color.White, fontSize = fontRegular)
                     }
@@ -182,7 +200,7 @@ fun HiScreen(onClickContinue: Runnable) {
 @Preview
 @Composable
 fun PreviewHiScreen() {
-    HiScreen({})
+    HiScreen(viewModel = HiUiAction.buildFake(), uiState = MutableHiUiState())
 }
 
 @Composable
