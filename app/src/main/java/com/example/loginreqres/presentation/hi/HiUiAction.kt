@@ -1,4 +1,4 @@
-package com.example.loginreqres.ui.hi
+package com.example.loginreqres.presentation.hi
 
 interface HiUiAction {
 

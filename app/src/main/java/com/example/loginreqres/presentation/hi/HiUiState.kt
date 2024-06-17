@@ -1,4 +1,4 @@
-package com.example.loginreqres.ui.hi
+package com.example.loginreqres.presentation.hi
 
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue

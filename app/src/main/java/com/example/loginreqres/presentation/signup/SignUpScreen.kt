@@ -1,8 +1,8 @@
-package com.example.loginreqres.ui.login
+package com.example.loginreqres.presentation.signup
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
@@ -29,7 +28,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
@@ -43,26 +41,32 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.loginreqres.R
+import com.example.loginreqres.navigation.Routes
+import com.example.loginreqres.navigation.Routes.Login.navigateParams
 import com.example.loginreqres.ui.theme.RGreen
 import com.example.loginreqres.ui.theme.fontRegular
 
-
 @Composable
-fun LoginScreen(viewModel: LoginViewModel = hiltViewModel(), navController: NavHostController) {
+fun SignUpScreen(viewModel: SignUpViewModel = hiltViewModel(), navController: NavHostController) {
     LaunchedEffect(Unit) {
         viewModel.channel.collect { event ->
-            when(event) {
-                is LoginUiEvent.OnContinue -> {
-                    //navController.navigate(Routes.)
+            when (event) {
+                is SignUpUiEvent.OnAgree -> {
+                    navController.navigate(Routes.Login.navigateParams(event.name, event.email))
+                }
+                SignUpUiEvent.OnBack -> {
+                    navController.popBackStack()
                 }
             }
         }
     }
-    LoginScreen(viewModel = viewModel, uiState = viewModel.uiState)
+
+    SignUpScreen(viewModel, viewModel.uiState)
 }
 
 @Composable
-fun LoginScreen(viewModel: LoginUiAction, uiState: LoginUiState) {
+fun SignUpScreen(viewModel: SignUpUiAction, uiState: SignUpUiState) {
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -82,6 +86,7 @@ fun LoginScreen(viewModel: LoginUiAction, uiState: LoginUiState) {
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
+            Spacer(modifier = Modifier.size(20.dp))
             Image(
                 imageVector = Icons.Filled.KeyboardArrowLeft,
                 contentDescription = "Background Image",
@@ -89,12 +94,15 @@ fun LoginScreen(viewModel: LoginUiAction, uiState: LoginUiState) {
                 modifier = Modifier
                     .align(Alignment.Start)
                     .size(40.dp)
+                    .clickable {
+                        viewModel.onBack()
+                    }
             )
 
             Spacer(modifier = Modifier.height(160.dp))
 
             Text(
-                text = "Log in",
+                text = "Sign up",
                 fontSize = 36.sp,
                 color = Color.White,
                 fontWeight = FontWeight.Bold,
@@ -111,33 +119,41 @@ fun LoginScreen(viewModel: LoginUiAction, uiState: LoginUiState) {
                     modifier = Modifier
                         .padding(20.dp)
                 ) {
-                    Row(
+                    Text(
+                        text = """Looks like you don't have an account. 
+                            |Let's create a new account for
+                        """.trimMargin(),
+                        color = Color.White,
+                        fontSize = fontRegular
+                    )
+                    Text(
+                        text = uiState.email,
+                        modifier = Modifier.padding(bottom = 8.dp),
+                        color = Color.White,
+                        fontSize = fontRegular,
+                        fontWeight = FontWeight.Bold
+                    )
+                    BasicTextField(
+                        value = uiState.name,
+                        onValueChange = {
+                            viewModel.onNameTyping(it)
+                            viewModel.onEnableButton()
+                        },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(8.dp)
-                    ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.face),
-                            contentDescription = "face",
-                            modifier = Modifier
-                                .size(60.dp)
-                                .clip(CircleShape)
-                                .border(2.dp, Color.Gray, CircleShape)
-                        )
-                        Column(modifier = Modifier.padding(start = 8.dp)) {
-                            Text(
-                                text = uiState.name,
-                                fontSize = fontRegular,
-                                color = Color.White,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Text(
-                                text = uiState.email,
-                                fontSize = fontRegular,
-                                color = Color.White
-                            )
+                            .padding(vertical = 8.dp)
+                            .background(Color.White, shape = RoundedCornerShape(8.dp))
+                            .padding(horizontal = 16.dp, vertical = 16.dp),
+                        decorationBox = { innerTextField ->
+                            if (uiState.name.isEmpty()) {
+                                Text(
+                                    text = "Name",
+                                    color = Color.Gray
+                                )
+                            }
+                            innerTextField()
                         }
-                    }
+                    )
 
                     Row(
                         modifier = Modifier
@@ -178,8 +194,35 @@ fun LoginScreen(viewModel: LoginUiAction, uiState: LoginUiState) {
                         }
                     }
 
+                    Text(
+                        text = "By selecting Agree and continue below,",
+                        color = Color.White,
+                        fontSize = fontRegular,
+                        modifier = Modifier
+                            .padding(top = 16.dp)
+                    )
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 20.dp),
+                        horizontalArrangement = Arrangement.Start,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "I agree to ",
+                            color = Color.White,
+                            fontSize = fontRegular
+                        )
+                        Text(
+                            text = "Terms of Service and Privacy Policy",
+                            color = RGreen,
+                            fontSize = 15.sp
+                        )
+                    }
+
                     Button(
-                        onClick = { },
+                        onClick = { viewModel.onAgree() },
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 8.dp)
@@ -189,19 +232,9 @@ fun LoginScreen(viewModel: LoginUiAction, uiState: LoginUiState) {
                         enabled = uiState.enableButton
                     ) {
                         Text(
-                            text = "Continue",
+                            text = "Agree and continue",
                             color = Color.White,
                             fontSize = fontRegular
-                        )
-                    }
-
-                    TextButton(onClick = { }) {
-                        Text(
-                            text = "Forgot your password?",
-                            color = RGreen,
-                            fontSize = 15.sp,
-                            modifier = Modifier
-                                .padding(vertical = 16.dp)
                         )
                     }
                 }
@@ -212,6 +245,6 @@ fun LoginScreen(viewModel: LoginUiAction, uiState: LoginUiState) {
 
 @Preview
 @Composable
-fun PreviewLoginScreen() {
-    LoginScreen(LoginUiAction.buildFake(), MutableLoginUiState())
+fun PreviewSignUpScreen() {
+    SignUpScreen(viewModel = SignUpUiAction.buildFake(), uiState = MutableSignUpUiState())
 }

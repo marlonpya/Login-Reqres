@@ -1,4 +1,4 @@
-package com.example.loginreqres.ui.signup
+package com.example.loginreqres.presentation.hi
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -32,8 +32,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -41,28 +40,27 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.loginreqres.R
 import com.example.loginreqres.navigation.Routes
-import com.example.loginreqres.navigation.Routes.Login.navigateParams
+import com.example.loginreqres.navigation.Routes.SignUp.navigateParams
 import com.example.loginreqres.ui.theme.RGreen
 import com.example.loginreqres.ui.theme.fontRegular
 
 @Composable
-fun SignUpScreen(viewModel: SignUpViewModel = hiltViewModel(), navController: NavHostController) {
+fun HiScreen(viewModel: HiViewModel = hiltViewModel(), navController: NavHostController) {
     LaunchedEffect(Unit) {
         viewModel.channel.collect { event ->
             when (event) {
-                is SignUpUiEvent.OnAgree -> {
-                    navController.navigate(Routes.Login.navigateParams(event.name, event.email))
+                is HiUIEvent.OnContinue -> {
+                    navController.navigate(Routes.SignUp.navigateParams(event.email))
                 }
             }
         }
     }
 
-    SignUpScreen(viewModel, viewModel.uiState)
+    HiScreen(viewModel, viewModel.uiState)
 }
 
 @Composable
-fun SignUpScreen(viewModel: SignUpUiAction, uiState: SignUpUiState) {
-
+fun HiScreen(viewModel: HiUiAction, uiState: HiUiState) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -82,6 +80,7 @@ fun SignUpScreen(viewModel: SignUpUiAction, uiState: SignUpUiState) {
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
+            Spacer(modifier = Modifier.size(20.dp))
             Image(
                 imageVector = Icons.Filled.KeyboardArrowLeft,
                 contentDescription = "Background Image",
@@ -94,7 +93,7 @@ fun SignUpScreen(viewModel: SignUpUiAction, uiState: SignUpUiState) {
             Spacer(modifier = Modifier.height(160.dp))
 
             Text(
-                text = "Sign up",
+                text = "Hi!",
                 fontSize = 36.sp,
                 color = Color.White,
                 fontWeight = FontWeight.Bold,
@@ -111,24 +110,10 @@ fun SignUpScreen(viewModel: SignUpUiAction, uiState: SignUpUiState) {
                     modifier = Modifier
                         .padding(20.dp)
                 ) {
-                    Text(
-                        text = """Looks like you don't have an account. 
-                            |Let's create a new account for
-                        """.trimMargin(),
-                        color = Color.White,
-                        fontSize = fontRegular
-                    )
-                    Text(
-                        text = uiState.email,
-                        modifier = Modifier.padding(bottom = 8.dp),
-                        color = Color.White,
-                        fontSize = fontRegular,
-                        fontWeight = FontWeight.Bold
-                    )
                     BasicTextField(
-                        value = uiState.name,
+                        value = uiState.email,
                         onValueChange = {
-                            viewModel.onNameTyping(it)
+                            viewModel.onEmailTyping(it)
                             viewModel.onEnableButton()
                         },
                         modifier = Modifier
@@ -137,9 +122,9 @@ fun SignUpScreen(viewModel: SignUpUiAction, uiState: SignUpUiState) {
                             .background(Color.White, shape = RoundedCornerShape(8.dp))
                             .padding(horizontal = 16.dp, vertical = 16.dp),
                         decorationBox = { innerTextField ->
-                            if (uiState.name.isEmpty()) {
+                            if (uiState.email.isEmpty()) {
                                 Text(
-                                    text = "Name",
+                                    text = "Email",
                                     color = Color.Gray
                                 )
                             }
@@ -147,74 +132,8 @@ fun SignUpScreen(viewModel: SignUpUiAction, uiState: SignUpUiState) {
                         }
                     )
 
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 8.dp)
-                            .background(Color.White, shape = RoundedCornerShape(8.dp))
-                            .padding(horizontal = 8.dp, vertical = 0.dp),
-                        horizontalArrangement = Arrangement.Start,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        BasicTextField(
-                            modifier = Modifier
-                                .weight(1f),
-                            value = uiState.password,
-                            onValueChange = {
-                                viewModel.onPasswordTyping(it)
-                                viewModel.onEnableButton()
-                            },
-                            visualTransformation = if (uiState.showPassword) VisualTransformation.None else PasswordVisualTransformation(),
-                            decorationBox = { innerTextField ->
-                                if (uiState.password.isEmpty()) {
-                                    Text(
-                                        text = "Password",
-                                        color = Color.Gray
-                                    )
-                                }
-                                innerTextField()
-                            }
-                        )
-                        TextButton(
-                            onClick = { viewModel.onShowPassword(!uiState.showPassword) },
-                        ) {
-                            Text(
-                                text = if (uiState.showPassword) "Hide" else "View",
-                                color = Color.Black,
-                                fontSize = fontRegular
-                            )
-                        }
-                    }
-
-                    Text(
-                        text = "By selecting Agree and continue below,",
-                        color = Color.White,
-                        fontSize = fontRegular,
-                        modifier = Modifier
-                            .padding(top = 16.dp)
-                    )
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 20.dp),
-                        horizontalArrangement = Arrangement.Start,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "I agree to ",
-                            color = Color.White,
-                            fontSize = fontRegular
-                        )
-                        Text(
-                            text = "Terms of Service and Privacy Policy",
-                            color = RGreen,
-                            fontSize = 15.sp
-                        )
-                    }
-
                     Button(
-                        onClick = { viewModel.onAgree() },
+                        onClick = { viewModel.onContinue() },
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 8.dp)
@@ -223,11 +142,55 @@ fun SignUpScreen(viewModel: SignUpUiAction, uiState: SignUpUiState) {
                         colors = ButtonDefaults.buttonColors(containerColor = RGreen),
                         enabled = uiState.enableButton
                     ) {
+                        Text(text = "Continue", color = Color.White, fontSize = fontRegular)
+                    }
+
+                    Text(
+                        text = "or",
+                        textAlign = TextAlign.Center,
+                        color = Color.White,
+                        fontSize = fontRegular,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp)
+                    )
+
+                    SocialLoginButton(
+                        text = "Continue with Facebook",
+                        color = Color(0xFF1877F2),
+                        onClick = { /* Handle Facebook Login */ }
+                    )
+                    SocialLoginButton(
+                        text = "Continue with Google",
+                        color = Color(0xFFDB4437),
+                        onClick = { /* Handle Google Login */ }
+                    )
+                    SocialLoginButton(
+                        text = "Continue with Apple",
+                        color = Color.Black,
+                        onClick = { /* Handle Apple Login */ }
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 10.dp),
+                        horizontalArrangement = Arrangement.Start,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         Text(
-                            text = "Agree and continue",
+                            text = "Don't have an account?",
                             color = Color.White,
                             fontSize = fontRegular
                         )
+                        TextButton(onClick = { /* Handle Sign Up */ }) {
+                            Text(text = "Sign up", color = RGreen, fontSize = fontRegular)
+                        }
+                    }
+
+                    TextButton(onClick = { /* Handle Forgot Password */ }) {
+                        Text(text = "Forgot your password?", color = RGreen, fontSize = fontRegular)
                     }
                 }
             }
@@ -237,6 +200,25 @@ fun SignUpScreen(viewModel: SignUpUiAction, uiState: SignUpUiState) {
 
 @Preview
 @Composable
-fun PreviewSignUpScreen() {
-    SignUpScreen(viewModel = SignUpUiAction.buildFake(), uiState = MutableSignUpUiState())
+fun PreviewHiScreen() {
+    HiScreen(viewModel = HiUiAction.buildFake(), uiState = MutableHiUiState())
+}
+
+@Composable
+fun SocialLoginButton(
+    text: String,
+    color: Color,
+    onClick: () -> Unit
+) {
+    Button(
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp)
+            .height(50.dp),
+        shape = RoundedCornerShape(8.dp),
+        colors = ButtonDefaults.buttonColors(containerColor = color)
+    ) {
+        Text(text = text, color = Color.White, fontSize = 16.sp)
+    }
 }

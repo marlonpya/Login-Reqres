@@ -1,4 +1,4 @@
-package com.example.loginreqres.ui.hi
+package com.example.loginreqres.presentation.hi
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

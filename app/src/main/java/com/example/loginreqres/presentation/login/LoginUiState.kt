@@ -1,4 +1,4 @@
-package com.example.loginreqres.ui.login
+package com.example.loginreqres.presentation.login
 
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
@@ -13,6 +13,7 @@ interface LoginUiState {
     val email: String
     val password: String
     val showPassword: Boolean
+    val showProgress: Boolean
     val enableButton: Boolean
 }
 
@@ -21,5 +22,6 @@ class MutableLoginUiState : LoginUiState, Updatable {
     override var email: String by mutableStateOf("")
     override var password: String by mutableStateOf("")
     override var showPassword: Boolean by mutableStateOf(false)
+    override var showProgress: Boolean by mutableStateOf(false)
     override var enableButton: Boolean by mutableStateOf(false)
 }

@@ -72,6 +72,12 @@ dependencies {
     // compose navigation
     implementation(libs.compose.navigation)
 
+    // net
+    implementation(libs.retrofit)
+    implementation(libs.okhttp)
+    implementation(libs.logging.interceptor)
+    implementation(libs.converter.gson)
+
     // hilt
     implementation(libs.hilt.navigation)
     implementation(libs.hilt.android)

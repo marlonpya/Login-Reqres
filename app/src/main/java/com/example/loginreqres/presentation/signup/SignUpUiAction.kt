@@ -1,4 +1,4 @@
-package com.example.loginreqres.ui.signup
+package com.example.loginreqres.presentation.signup
 
 interface SignUpUiAction {
 
@@ -7,6 +7,7 @@ interface SignUpUiAction {
     fun onPasswordTyping(value: String)
     fun onShowPassword(show: Boolean)
     fun onEnableButton()
+    fun onBack()
 
     companion object {
         fun buildFake() = object : SignUpUiAction {
@@ -15,6 +16,7 @@ interface SignUpUiAction {
             override fun onPasswordTyping(value: String) { }
             override fun onShowPassword(show: Boolean) { }
             override fun onEnableButton() { }
+            override fun onBack() { }
         }
     }
 }

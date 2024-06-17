@@ -1,4 +1,4 @@
-package com.example.loginreqres.ui.signup
+package com.example.loginreqres.presentation.signup
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -47,5 +47,11 @@ class SignUpViewModel @Inject constructor(
 
     override fun onEnableButton() {
         uiState.enableButton = uiState.email.isNotEmpty() && uiState.password.isNotEmpty()
+    }
+
+    override fun onBack() {
+        viewModelScope.launch(Dispatchers.Default) {
+            _channel.send(SignUpUiEvent.OnBack)
+        }
     }
 }

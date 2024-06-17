@@ -10,9 +10,10 @@ import androidx.navigation.navArgument
 import com.example.loginreqres.navigation.Routes
 import com.example.loginreqres.navigation.Routes.Login.destinationWithParams
 import com.example.loginreqres.navigation.Routes.SignUp.destinationWithParams
-import com.example.loginreqres.ui.hi.HiScreen
-import com.example.loginreqres.ui.login.LoginScreen
-import com.example.loginreqres.ui.signup.SignUpScreen
+import com.example.loginreqres.presentation.contacts.ContactsScreen
+import com.example.loginreqres.presentation.hi.HiScreen
+import com.example.loginreqres.presentation.login.LoginScreen
+import com.example.loginreqres.presentation.signup.SignUpScreen
 
 
 @Composable
@@ -43,6 +44,10 @@ fun ReqresNavHost(
             })
         ) {
             LoginScreen(navController = navController)
+        }
+
+        composable(Routes.Contacts.destination) {
+            ContactsScreen()
         }
     }
 }
