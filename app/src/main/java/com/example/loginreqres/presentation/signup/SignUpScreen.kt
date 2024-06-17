@@ -197,7 +197,7 @@ fun SignUpScreen(viewModel: SignUpUiAction, uiState: SignUpUiState) {
                     Text(
                         text = "By selecting Agree and continue below,",
                         color = Color.White,
-                        fontSize = fontRegular,
+                        fontSize = 13.sp,
                         modifier = Modifier
                             .padding(top = 16.dp)
                     )
@@ -212,12 +212,12 @@ fun SignUpScreen(viewModel: SignUpUiAction, uiState: SignUpUiState) {
                         Text(
                             text = "I agree to ",
                             color = Color.White,
-                            fontSize = fontRegular
+                            fontSize = 13.sp
                         )
                         Text(
                             text = "Terms of Service and Privacy Policy",
                             color = RGreen,
-                            fontSize = 15.sp
+                            fontSize = 13.sp
                         )
                     }
 
